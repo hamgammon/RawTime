@@ -1,0 +1,18 @@
+# Build artifacts
+build/
+Software/Apps/RawTime-CMake/build/
+Output/*
+!Output/.gitignore
+*.elf
+*.bin
+*.map
+*.o
+*.obj
+
+# Editor & OS files
+.vscode/
+.idea/
+*.swp
+*.bak
+*~
+.DS_Store
