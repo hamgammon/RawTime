@@ -3,6 +3,9 @@ build/
 Software/Apps/RawTime-CMake/build/
 Output/*
 !Output/.gitignore
+!Output/app-manifest.json
+*.zip
+*.uapp
 *.elf
 *.bin
 *.map
