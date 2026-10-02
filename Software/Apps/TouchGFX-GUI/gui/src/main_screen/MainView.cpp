@@ -1,17 +1,18 @@
 #include <gui/main_screen/MainView.hpp>
 #include <gui/common/RawTimeLabels.hpp>
 #include <touchgfx/Color.hpp>
+#include <cstdio>
 
 /// The face is square and the clock group is centred on it.
 static const int16_t kFaceWidth = 240;
 
 static const char* const kDayNames[7] = {
-    "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
+    "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
 static const char* const kMonthNames[12] = {
-    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
 MainView::MainView()
@@ -160,14 +161,26 @@ void MainView::updateDateText()
 {
     const char* dayName = kDayNames[mShown.wday % 7u];
     const char* monthName = kMonthNames[mShown.mon % 12u];
+    const unsigned dayNum = static_cast<unsigned>(mShown.mday);
 
+    char temp[32];
     if (mStyle.monthFirst) {
-        Unicode::snprintf(mDateBuffer, DATE_BUFFER_SIZE, "%s, %s %02u",
-                          dayName, monthName, static_cast<unsigned>(mShown.mday));
+        // e.g. "Fri Oct 02"
+        snprintf(temp, sizeof(temp), "%s %s %02u", dayName, monthName, dayNum);
     } else {
-        Unicode::snprintf(mDateBuffer, DATE_BUFFER_SIZE, "%s, %02u %s",
-                          dayName, static_cast<unsigned>(mShown.mday), monthName);
+        // e.g. "Fri 02 Oct"
+        snprintf(temp, sizeof(temp), "%s %02u %s", dayName, dayNum, monthName);
     }
+
+    // Convert 8-bit ASCII string directly to TouchGFX 16-bit UnicodeChar
+    for (uint16_t i = 0; i < DATE_BUFFER_SIZE; ++i) {
+        mDateBuffer[i] = static_cast<touchgfx::Unicode::UnicodeChar>(temp[i]);
+        if (temp[i] == '\0') {
+            break;
+        }
+    }
+    mDateBuffer[DATE_BUFFER_SIZE - 1] = 0;
+
     weekdayText.invalidate();
 }
 
