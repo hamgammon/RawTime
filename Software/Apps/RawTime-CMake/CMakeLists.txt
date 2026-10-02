@@ -7,7 +7,7 @@ set(APP_NAME "RawTime")
 set(APP_USER_NAME "RawTime")
 set(APP_TYPE "Clockface")
 set(DEV_ID "UNA")
-set(APP_ID "E59BC72570B21127")
+set(APP_ID "B3F4562A391603D7")
 set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Resources")
 set(OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../Output")
 set(LIBS_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../Libs")
@@ -33,7 +33,7 @@ endif()
 project(${APP_NAME})
 
 # Set up version
-set(BUILD_VERSION "0.0.2")
+set(BUILD_VERSION "1.0.0")
 una_app_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Build service
