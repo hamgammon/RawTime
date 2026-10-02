@@ -10,5 +10,14 @@
   "minKernelVersion": "1.4.0",
   "requiredHardware": [],
   "description": "Simple watch face for showing time, date and battery - minimal, clean, and functional.",
-  "id": "B3F4562A391603D7"
+  "id": "B3F4562A391603D7",
+  "supportsLaps": false,
+  "supportsDistance": false,
+  "supportsTrack": false,
+  "supportsHeartbeat": false,
+  "supportsElevation": false,
+  "supportsStep": false,
+  "supportsSpeed": "none",
+  "customMeasures": [],
+  "stravaExport": false
 }
