@@ -1,6 +1,6 @@
 # RawTime
 
-> Simple watch face for showing time, date, and battery — minimal, clean, and functional.
+> Simple watch face for showing time, date and battery — minimal, clean, and functional.
 
 A clean, high-contrast digital watchface designed for the [UNA Watch](https://unawatch.com) (240×240 display).
 
