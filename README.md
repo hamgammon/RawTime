@@ -1,45 +1,83 @@
 # RawTime
 
-A clean, minimalist digital watchface for the [UNA Watch](https://unawatch.com).
+> Simple watch face for showing time, date, and battery — minimal, clean, and functional.
+
+A clean, high-contrast digital watchface designed for the [UNA Watch](https://unawatch.com) (240×240 display).
 
 ```
-+-----------------------------------+
-|                                   |
-|                                   |
-|             10 : 42               |   <- Centered Time (12h/24h)
-|                                   |
-|             FRIDAY                |   <- Weekday
-|             OCT 02                |   <- Date (Month & Day)
-|                                   |
-|             [====|]               |   <- Battery Indicator
-|                                   |
-+-----------------------------------+
++---------------------------------------+
+|             240 x 240 px              |
+|                                       |
+|                                       |
+|                10 : 42                |  <- 76pt Poppins SemiBold
+|                                       |     (Edge-to-edge 220px width)
+|                                       |
+|              Fri 02 Oct               |  <- Single-Line Date (16pt)
+|                                       |     (3-letter day & month)
+|                [■■■■|]                |  <- 4-Segment Battery Bar
+|                                       |     (Bottom-center)
++---------------------------------------+
+```
+
+```mermaid
+flowchart TD
+    subgraph Display["RawTime Display (240x240)"]
+        direction TB
+        TIME["Time Display<br/>76pt Poppins SemiBold (220px wide)"]
+        DATE["Date Display<br/>Single Line: 'Fri 02 Oct'"]
+        BATTERY["Battery Indicator<br/>4-Segment Dynamic Level Bar"]
+        TIME --> DATE --> BATTERY
+    end
 ```
 
 ## Features
 
-- **Centered Digital Clock**: Bold, monospaced time readout (`IBMPlexMono_Medium_36`) with persistent colon separator. Supports both 12-hour (with `am`/`pm` meridiem indicator) and 24-hour formats.
-- **Date Underneath**: Two-line clean date display with full weekday name and month/day number, automatically adopting the user's system date order (`Month Day` or `Day Month`).
-- **Battery Indicator**: Bottom-center vector battery icon with 4 level segments matching UNA OS glance standards:
-  - `75% - 100%`: 4 segments (Teal)
-  - `50% - 74%`: 3 segments (Teal)
-  - `25% - 49%`: 2 segments (Teal)
-  - `1% - 24%`: 1 segment (Red alert)
-- **Power Efficient**: Follows UNA Watch power constraints ("Do not subscribe to what you do not draw") — subscribes exclusively to `BATTERY_LEVEL` sensor events and updates the clock once per minute.
+- **Large Bold Digital Clock**: Giant, high-contrast time readout rendered in **76pt Poppins SemiBold** (`Poppins_SemiBold_76_2bpp`) spanning 220px horizontally for maximum legibility on the 240px screen with comfortable 10px margins. Supports 24-hour and 12-hour formats.
+- **Single-Line Date**: Compact, clean date display underneath the clock in 16pt font (`Fri 02 Oct`), showing the 3-letter weekday, 2-digit day of the month, and 3-letter month name.
+- **Battery Indicator**: Bottom-center vector battery gauge with 4 charge segments:
+  - `75% - 100%`: 4 active segments
+  - `50% - 74%`: 3 active segments
+  - `25% - 49%`: 2 active segments
+  - `1% - 24%`: 1 active segment
+- **Power Efficient**: Adheres strictly to the UNA Watch power guidelines ("Do not subscribe to what you do not draw") — subscribes only to `BATTERY_LEVEL` sensor events and updates the display once per minute.
 
 ## Architecture
 
 Built using the UNA Watch SDK two-process model:
 
-1. **Service (`RawTimeService.elf`)**: Background daemon on the RTOS kernel. Reads local time, monitors battery level, queries system settings, and sends IPC messages.
-2. **GUI (`RawTimeGUI.elf`)**: Foreground TouchGFX process that handles layout, typography, and draws the user interface.
+```mermaid
+flowchart LR
+    subgraph Service["RawTimeService.elf (Background)"]
+        RTC["Hardware RTC<br/>WallTime"]
+        BATT["Battery Sensor<br/>Level Events"]
+    end
+
+    subgraph IPC["OS Message Queue"]
+        QUE["IPC Queue<br/>G2B / B2G Events"]
+    end
+
+    subgraph GUI["RawTimeGUI.elf (TouchGFX)"]
+        PRES["MainPresenter"]
+        VIEW["MainView"]
+        DISP["240x240 LCD"]
+    end
+
+    RTC -->|Minute Tick| QUE
+    BATT -->|Charge Update| QUE
+    QUE --> PRES
+    PRES --> VIEW
+    VIEW --> DISP
+```
+
+1. **Service (`RawTimeService.elf`)**: Background daemon running on the RTOS kernel. Reads local time, monitors battery level, and posts IPC events.
+2. **GUI (`RawTimeGUI.elf`)**: Foreground TouchGFX process that handles layout, typography rendering, and screen redraws.
 
 ## Building
 
 ### Prerequisites
 
 - [UNA Watch SDK](https://github.com/UNAWatch/una-sdk)
-- ST ARM GCC Toolchain (Cortex-M33, e.g. from STM32CubeCLT)
+- ST ARM GCC Toolchain (`arm-none-eabi-gcc` Cortex-M33, e.g. from STM32CubeCLT)
 - CMake 3.21+ and GNU Make
 - Python 3 with requirements from `$UNA_SDK/Utilities/Scripts/app_packer/requirements.txt`
 
@@ -50,7 +88,7 @@ Built using the UNA Watch SDK two-process model:
 export UNA_SDK="/path/to/una-sdk"
 
 # 2. Configure build
-cmake -B build -S Software/Apps/RawTime-CMake -DCMAKE_TOOLCHAIN_FILE="$UNA_SDK/cmake/arm-none-eabi.cmake"
+cmake -B build Software/Apps/RawTime-CMake
 
 # 3. Build and package .uapp
 cmake --build build
@@ -58,7 +96,7 @@ cmake --build build
 
 The compiled package will be generated at:
 ```text
-Output/RawTime_0.0.1.uapp
+build/RawTime_0.0.2.uapp
 ```
 
 ## License
