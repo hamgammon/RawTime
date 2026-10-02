@@ -102,10 +102,16 @@ void MainView::layoutClock()
     const int16_t hourWidth   = static_cast<int16_t>(hourText.getTextWidth());
     const int16_t minuteWidth = static_cast<int16_t>(minuteText.getTextWidth());
     const int16_t colonWidth  = static_cast<int16_t>(colonText.getTextWidth());
+    const int16_t digitsTotal = static_cast<int16_t>(hourWidth + colonWidth + minuteWidth);
 
-    int16_t total = static_cast<int16_t>(hourWidth + colonWidth + minuteWidth);
+    int16_t total = digitsTotal;
+    bool inlineMeridiem = false;
     if (mStyle.is12h) {
-        total = static_cast<int16_t>(total + kMeridiemGap + meridiemText.getTextWidth());
+        int16_t withMeridiem = static_cast<int16_t>(digitsTotal + kMeridiemGap + meridiemText.getTextWidth());
+        if (withMeridiem <= kFaceWidth - 12) {
+            total = withMeridiem;
+            inlineMeridiem = true;
+        }
     }
 
     int16_t x = static_cast<int16_t>((kFaceWidth - total) / 2);
@@ -120,8 +126,16 @@ void MainView::layoutClock()
     x = static_cast<int16_t>(x + minuteWidth + kMeridiemGap);
 
     if (mStyle.is12h) {
-        place(meridiemText, x, static_cast<int16_t>(kClockY + kMeridiemDrop),
-              static_cast<int16_t>(meridiemText.getTextWidth()), kMeridiemHeight);
+        int16_t mWidth = static_cast<int16_t>(meridiemText.getTextWidth());
+        if (inlineMeridiem) {
+            place(meridiemText, x, static_cast<int16_t>(kClockY + kMeridiemDrop),
+                  mWidth, kMeridiemHeight);
+        } else {
+            // Tucked neatly above the top-right of the minute digits
+            place(meridiemText, static_cast<int16_t>(kFaceWidth - mWidth - 10),
+                  static_cast<int16_t>(kClockY - kMeridiemHeight + 4),
+                  mWidth, kMeridiemHeight);
+        }
         meridiemText.setVisible(true);
         meridiemText.invalidate();
     } else {

@@ -63,11 +63,11 @@ private:
     void updateDateText();
 
     /// Vertical placement: time centered in the upper-middle of 240x240 screen.
-    static const int16_t kClockY = 68;
-    static const int16_t kClockHeight = 62;
+    static const int16_t kClockY = 56;
+    static const int16_t kClockHeight = 80;
 
     /// The meridiem sits on the clock's baseline.
-    static const int16_t kMeridiemDrop = 34;
+    static const int16_t kMeridiemDrop = 42;
     static const int16_t kMeridiemHeight = 20;
     static const int16_t kMeridiemGap = 6;
 
