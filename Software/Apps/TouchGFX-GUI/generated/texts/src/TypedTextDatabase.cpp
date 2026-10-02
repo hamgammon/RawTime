@@ -6,16 +6,16 @@
 #include <texts/TypedTextDatabase.hpp>
 
 extern touchgfx::GeneratedFont& getFont_IBMPlexMono_SemiBold_85_2bpp();
-extern touchgfx::GeneratedFont& getFont_IBMPlexMono_Medium_36_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_60_2bpp();
 extern touchgfx::GeneratedFont& getFont_IBMPlexMono_Medium_20_2bpp();
-extern touchgfx::GeneratedFont& getFont_IBMPlexMono_Medium_16_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_Medium_16_2bpp();
 extern touchgfx::GeneratedFont& getFont_Poppins_Medium_14_2bpp();
 
 const touchgfx::Font* touchgfx_fonts[] = {
     &(getFont_IBMPlexMono_SemiBold_85_2bpp()),
-    &(getFont_IBMPlexMono_Medium_36_2bpp()),
+    &(getFont_Poppins_SemiBold_60_2bpp()),
     &(getFont_IBMPlexMono_Medium_20_2bpp()),
-    &(getFont_IBMPlexMono_Medium_16_2bpp()),
+    &(getFont_Poppins_Medium_16_2bpp()),
     &(getFont_Poppins_Medium_14_2bpp())
 };
 
@@ -95,13 +95,13 @@ void resetFont(touchgfx::FontId fontId)
         touchgfx_fonts[0] = &(getFont_IBMPlexMono_SemiBold_85_2bpp());
         break;
     case 1:
-        touchgfx_fonts[1] = &(getFont_IBMPlexMono_Medium_36_2bpp());
+        touchgfx_fonts[1] = &(getFont_Poppins_SemiBold_60_2bpp());
         break;
     case 2:
         touchgfx_fonts[2] = &(getFont_IBMPlexMono_Medium_20_2bpp());
         break;
     case 3:
-        touchgfx_fonts[3] = &(getFont_IBMPlexMono_Medium_16_2bpp());
+        touchgfx_fonts[3] = &(getFont_Poppins_Medium_16_2bpp());
         break;
     case 4:
         touchgfx_fonts[4] = &(getFont_Poppins_Medium_14_2bpp());

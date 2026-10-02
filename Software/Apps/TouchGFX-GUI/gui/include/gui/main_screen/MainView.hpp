@@ -62,24 +62,24 @@ private:
     /** Rewrite the date parts from the reading on screen. */
     void updateDateText();
 
-    /// Vertical placement: time centred in the middle of 240x240 screen.
-    static const int16_t kClockY = 88;
-    static const int16_t kClockHeight = 47;
+    /// Vertical placement: time centered in the upper-middle of 240x240 screen.
+    static const int16_t kClockY = 68;
+    static const int16_t kClockHeight = 62;
 
     /// The meridiem sits on the clock's baseline.
-    static const int16_t kMeridiemDrop = 19;
-    static const int16_t kMeridiemHeight = 22;
-    static const int16_t kMeridiemGap = 4;
+    static const int16_t kMeridiemDrop = 34;
+    static const int16_t kMeridiemHeight = 20;
+    static const int16_t kMeridiemGap = 6;
 
-    /// Date placement underneath the time.
-    static const int16_t kWeekdayY = 144;
-    static const int16_t kWeekdayHeight = 20;
-    static const int16_t kDateY = 168;
-    static const int16_t kMonthHeight = 24;
-    static const int16_t kDateNumHeight = 20;
+    /// Date placement underneath the time (single line).
+    static const int16_t kDateY = 148;
+    static const int16_t kDateHeight = 24;
 
     WallTime   mShown;  ///< Reading currently on the display
     ClockStyle mStyle;  ///< Settings the clock and date are drawn in
+
+    static const uint16_t DATE_BUFFER_SIZE = 32;
+    touchgfx::Unicode::UnicodeChar mDateBuffer[DATE_BUFFER_SIZE];
 
     // Battery indicator at bottom centre
     touchgfx::Container mBatteryContainer;

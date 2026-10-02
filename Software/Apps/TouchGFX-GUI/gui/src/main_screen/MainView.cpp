@@ -5,6 +5,15 @@
 /// The face is square and the clock group is centred on it.
 static const int16_t kFaceWidth = 240;
 
+static const char* const kDayNames[7] = {
+    "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
+};
+
+static const char* const kMonthNames[12] = {
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+    "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+};
+
 MainView::MainView()
     : mShown{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }  // nothing on screen yet, so the first reading draws
     , mStyle{ false, false }
@@ -19,23 +28,29 @@ void MainView::setupScreen()
     // Hide unused template elements
     dayText.setVisible(false);
     dayText.invalidate();
+    monthText.setVisible(false);
+    monthText.invalidate();
+    stepsText.setVisible(false);
+    stepsText.invalidate();
     rule.setVisible(false);
     rule.invalidate();
     stepsIcon.setVisible(false);
     stepsIcon.invalidate();
 
-    // Tune text colors for high readability
+    // Date on one line: rebind weekdayText to larger buffer mDateBuffer
+    mDateBuffer[0] = 0;
+    weekdayText.setWildcard(mDateBuffer);
+    weekdayText.setColor(touchgfx::Color::getColorFromRGB(192, 192, 192));
+
+    // High-contrast, bold time typography
     hourText.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     colonText.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     minuteText.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     meridiemText.setColor(touchgfx::Color::getColorFromRGB(180, 180, 180));
-    weekdayText.setColor(touchgfx::Color::getColorFromRGB(180, 180, 180));
-    monthText.setColor(touchgfx::Color::getColorFromRGB(220, 220, 220));
-    stepsText.setColor(touchgfx::Color::getColorFromRGB(220, 220, 220));
 
-    // Construct battery indicator widget at bottom centre (x = 99, y = 208, w = 42, h = 16)
+    // Construct battery indicator widget at bottom centre (x = 99, y = 206, w = 42, h = 16)
     if (mBatteryContainer.getParent() == nullptr) {
-        mBatteryContainer.setPosition(99, 208, 42, 16);
+        mBatteryContainer.setPosition(99, 206, 42, 16);
 
         // Battery outer border
         mBatteryBody.setPosition(0, 0, 38, 16);
@@ -63,6 +78,7 @@ void MainView::setupScreen()
     }
 
     mStyle = presenter->clockStyle();
+    layoutDate();
     setTime(presenter->currentTime());
     setBatteryLevel(presenter->batteryLevel());
 }
@@ -118,23 +134,8 @@ void MainView::layoutClock()
 
 void MainView::layoutDate()
 {
-    // Weekday centered horizontally on top row
-    place(weekdayText, 0, kWeekdayY, kFaceWidth, kWeekdayHeight);
-
-    // Month and day-of-month paired and centered horizontally underneath
-    const int16_t mWidth = static_cast<int16_t>(monthText.getTextWidth());
-    const int16_t dWidth = static_cast<int16_t>(stepsText.getTextWidth());
-    const int16_t gap = 6;
-    const int16_t total = static_cast<int16_t>(mWidth + gap + dWidth);
-    const int16_t startX = static_cast<int16_t>((kFaceWidth - total) / 2);
-
-    if (mStyle.monthFirst) {
-        place(monthText, startX, kDateY, mWidth, kMonthHeight);
-        place(stepsText, static_cast<int16_t>(startX + mWidth + gap), static_cast<int16_t>(kDateY + 4), dWidth, kDateNumHeight);
-    } else {
-        place(stepsText, startX, static_cast<int16_t>(kDateY + 4), dWidth, kDateNumHeight);
-        place(monthText, static_cast<int16_t>(startX + dWidth + gap), kDateY, mWidth, kMonthHeight);
-    }
+    // Full date rendered on a single line, centered horizontally across the display
+    place(weekdayText, 0, kDateY, kFaceWidth, kDateHeight);
 }
 
 void MainView::updateClockText()
@@ -152,24 +153,22 @@ void MainView::updateClockText()
     }
 
     Unicode::snprintf(minuteTextBuffer, MINUTETEXT_SIZE, "%02u",
-                          static_cast<unsigned>(mShown.minute));
+                      static_cast<unsigned>(mShown.minute));
 }
 
 void MainView::updateDateText()
 {
-    Unicode::snprintf(weekdayTextBuffer, WEEKDAYTEXT_SIZE, "%s",
-                      touchgfx::TypedText(
-                          App::Labels::kDayLabels[mShown.wday % 7u]).getText());
+    const char* dayName = kDayNames[mShown.wday % 7u];
+    const char* monthName = kMonthNames[mShown.mon % 12u];
+
+    if (mStyle.monthFirst) {
+        Unicode::snprintf(mDateBuffer, DATE_BUFFER_SIZE, "%s, %s %02u",
+                          dayName, monthName, static_cast<unsigned>(mShown.mday));
+    } else {
+        Unicode::snprintf(mDateBuffer, DATE_BUFFER_SIZE, "%s, %02u %s",
+                          dayName, static_cast<unsigned>(mShown.mday), monthName);
+    }
     weekdayText.invalidate();
-
-    Unicode::snprintf(stepsTextBuffer, STEPSTEXT_SIZE, "%02u",
-                      static_cast<unsigned>(mShown.mday));
-    stepsText.invalidate();
-
-    Unicode::snprintf(monthTextBuffer, MONTHTEXT_SIZE, "%s",
-                      touchgfx::TypedText(
-                          App::Labels::kMonthLabels[mShown.mon % 12u]).getText());
-    monthText.invalidate();
 }
 
 void MainView::setTime(const WallTime &time)
@@ -183,7 +182,6 @@ void MainView::setTime(const WallTime &time)
     updateClockText();
     layoutClock();
     updateDateText();
-    layoutDate();
 }
 
 void MainView::setClockStyle(const ClockStyle &style)
@@ -196,7 +194,7 @@ void MainView::setClockStyle(const ClockStyle &style)
 
     updateClockText();
     layoutClock();
-    layoutDate();
+    updateDateText();
 }
 
 void MainView::setSteps(uint32_t /*steps*/)
