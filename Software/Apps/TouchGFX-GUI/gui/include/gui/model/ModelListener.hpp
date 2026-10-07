@@ -30,8 +30,9 @@ public:
     /** @brief A new step count arrived from the service. */
     virtual void onSteps(uint32_t steps) { (void)steps; }
 
-    /** @brief A new battery charge level arrived from the service. */
-    virtual void onBatteryLevel(uint8_t level) { (void)level; }
+    /** @brief A new battery charge level or visibility state arrived from the service. */
+    virtual void onBattery(uint8_t level, bool enabled) { (void)level; (void)enabled; }
+    virtual void onBatteryLevel(uint8_t level) { onBattery(level, true); }
 
     /** @brief The watch's 12/24-hour setting changed, or arrived for the first time. */
     virtual void onClockStyle(const ClockStyle &style) { (void)style; }

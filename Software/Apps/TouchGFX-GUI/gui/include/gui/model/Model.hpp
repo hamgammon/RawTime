@@ -84,6 +84,9 @@ public:
     /** @brief Latest battery charge level (0..100%). */
     uint8_t batteryLevel() const { return mBatteryLevel; }
 
+    /** @brief Whether the battery indicator is enabled. */
+    bool isBatteryEnabled() const { return mShowBattery; }
+
     /**
      * @brief Whether the watch is set to a 12-hour clock.
      *
@@ -107,6 +110,7 @@ protected:
     WallTime mTime {};              ///< Reading the service last reported
     uint32_t mSteps = 0;            ///< Count the service last reported
     uint8_t  mBatteryLevel = 100;   ///< Battery level as last read (0..100)
+    bool     mShowBattery = true;   ///< Whether battery is enabled from config
     ClockStyle mStyle {};
 
     // IGuiLifeCycleCallback

@@ -39,7 +39,8 @@ flowchart TD
   - `50% - 74%`: 3 active segments
   - `25% - 49%`: 2 active segments
   - `1% - 24%`: 1 active segment
-- **Power Efficient**: Adheres strictly to the UNA Watch power guidelines ("Do not subscribe to what you do not draw") — subscribes only to `BATTERY_LEVEL` sensor events and updates the display once per minute.
+  - **Configurable**: Can be disabled/hidden from the watch face via companion app configuration (`showBattery`).
+- **Power Efficient**: Adheres strictly to the UNA Watch power guidelines ("Do not subscribe to what you do not draw") — subscribes to `BATTERY_LEVEL` sensor events only when the battery gauge is enabled, and drops the sensor subscription entirely when disabled.
 
 ## Architecture
 

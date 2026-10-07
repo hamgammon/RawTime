@@ -11,6 +11,16 @@
   "requiredHardware": [],
   "description": "Simple watch face for showing time, date and battery - minimal, clean, and functional.",
   "id": "B3F4562A391603D7",
+  "configFile": "app_config.json",
+  "configFields": [
+    {
+      "id": "showBattery",
+      "type": "bool",
+      "label": "Show battery",
+      "description": "Show the battery indicator on the watch face.",
+      "default": true
+    }
+  ],
   "supportsLaps": false,
   "supportsDistance": false,
   "supportsTrack": false,

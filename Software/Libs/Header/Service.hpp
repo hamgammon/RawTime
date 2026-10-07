@@ -13,8 +13,11 @@
 #include "SDK/SensorLayer/SensorTypes.hpp"
 #include "SDK/SensorLayer/SensorDataBatch.hpp"
 
+#include "SDK/AppConfig/AppConfig.hpp"
+
 #include <cstdint>
 #include <ctime>
+#include <memory>
 
 /**
  * @class Service
@@ -98,6 +101,9 @@ private:
     uint8_t  mMon;
     bool     mTimeSent;             ///< A time has reached the GUI
 
+    std::unique_ptr<SDK::AppConfig> mConfig;
+    bool     mShowBattery;          ///< Battery indicator enabled in config
+    bool     mSentShowBattery;      ///< Last battery enabled state sent to GUI
     uint8_t  mBatteryLevel;         ///< Latest battery level (0..100)
     uint8_t  mSentBatteryLevel;     ///< Last battery level sent to GUI
     bool     mBatterySent;          ///< Battery level has reached the GUI

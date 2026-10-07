@@ -27,9 +27,14 @@ void MainPresenter::onSteps(uint32_t steps)
     view.setSteps(steps);
 }
 
+void MainPresenter::onBattery(uint8_t level, bool enabled)
+{
+    view.setBattery(level, enabled);
+}
+
 void MainPresenter::onBatteryLevel(uint8_t level)
 {
-    view.setBatteryLevel(level);
+    view.setBattery(level, true);
 }
 
 void MainPresenter::onClockStyle(const ClockStyle &style)

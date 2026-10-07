@@ -136,10 +136,12 @@ bool Model::customMessageHandler(SDK::MessageBase *message)
 
         case CustomMessage::BATTERY: {
             auto *msg = static_cast<CustomMessage::Battery*>(message);
-            if (mBatteryLevel != msg->level) {
+            const bool changed = (mBatteryLevel != msg->level) || (mShowBattery != msg->enabled);
+            if (changed) {
                 mBatteryLevel = msg->level;
+                mShowBattery  = msg->enabled;
                 if (modelListener) {
-                    modelListener->onBatteryLevel(mBatteryLevel);
+                    modelListener->onBattery(mBatteryLevel, mShowBattery);
                 }
             }
         } break;

@@ -339,6 +339,15 @@
     <ClCompile Include="$(SdkPath)\Libs\Source\Wrappers\StdLibWrappers.c">
       <Filter>SDK\Libs\Source\Wrappers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\Libs\Sources\AppConfigFields.cpp">
+      <Filter>Libs\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SdkPath)\Libs\Source\AppConfig\AppConfig.cpp">
+      <Filter>SDK\Libs\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SdkPath)\ThirdParty\coreJSON\source\core_json.c">
+      <Filter>SDK\Libs\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\Libs\Sources\Service.cpp">
       <Filter>Libs\Source</Filter>
     </ClCompile>

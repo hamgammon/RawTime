@@ -1,5 +1,6 @@
 #include "Service.hpp"
 #include "Commands.hpp"
+#include "AppConfigFields.hpp"
 
 #include "SDK/Messages/MessageBase.hpp"
 #include "SDK/Messages/MessageTypes.hpp"
@@ -69,6 +70,8 @@ Service::Service(SDK::Kernel &kernel)
     , mWday(0)
     , mMon(0)
     , mTimeSent(false)
+    , mShowBattery(true)
+    , mSentShowBattery(true)
     , mBatteryLevel(100)
     , mSentBatteryLevel(0)
     , mBatterySent(false)
@@ -88,12 +91,19 @@ Service::~Service()
 
 void Service::run()
 {
-    LOG_INFO("Started\n");
+    // Read the configuration here rather than in the constructor. The file the
+    // companion app wrote is read once at launch and on resume.
+    mConfig.reset(new SDK::AppConfig(mKernel, RawTimeConfig::kFileName,
+                                     RawTimeConfig::kFields,
+                                     RawTimeConfig::kFieldCount));
+    mShowBattery = mConfig->getBool("showBattery");
 
-    // The face is on screen for as long as the app is loaded, so there is no
-    // moment worth deferring the subscription to. Connecting publishes the
-    // current count straight away, which is what fills the row on boot.
-    connect();
+    LOG_INFO("Started (showBattery: %s)\n", mShowBattery ? "yes" : "no");
+
+    // Do not subscribe to what you do not draw: only connect if enabled
+    if (mShowBattery) {
+        connect();
+    }
 
     bool guiStarted = false;
     const uint32_t startTime = mKernel.sys.getTimeMs();
@@ -200,7 +210,7 @@ void Service::disconnect()
 
 void Service::handleSensorData(uint16_t handle, SDK::Sensor::DataBatch &data)
 {
-    if (!mBatterySensor.matchesDriver(handle)) {
+    if (!mShowBattery || !mBatterySensor.matchesDriver(handle)) {
         return;
     }
 
@@ -222,6 +232,22 @@ void Service::republishAll()
     mTimeSent    = false;
     mBatterySent = false;
     mFormatSent  = false;
+
+    // Reload configuration if file changed while suspended
+    if (mConfig) {
+        mConfig.reset(new SDK::AppConfig(mKernel, RawTimeConfig::kFileName,
+                                         RawTimeConfig::kFields,
+                                         RawTimeConfig::kFieldCount));
+        const bool prevShowBattery = mShowBattery;
+        mShowBattery = mConfig->getBool("showBattery");
+        if (mShowBattery != prevShowBattery) {
+            if (mShowBattery) {
+                connect();
+            } else {
+                disconnect();
+            }
+        }
+    }
 
     publishBattery();
     refreshSystemSettings();
@@ -273,12 +299,15 @@ void Service::publishTime(const std::tm &local)
 
 void Service::publishBattery()
 {
-    if (mBatterySent && (mBatteryLevel == mSentBatteryLevel)) {
+    if (mBatterySent && (mBatteryLevel == mSentBatteryLevel) &&
+        (mShowBattery == mSentShowBattery)) {
         return;
     }
 
     mSentBatteryLevel = mBatteryLevel;
-    mBatterySent = SDK::send_msg<CustomMessage::Battery>(mKernel, mSentBatteryLevel);
+    mSentShowBattery  = mShowBattery;
+    mBatterySent = SDK::send_msg<CustomMessage::Battery>(
+        mKernel, mSentBatteryLevel, mSentShowBattery);
 }
 
 void Service::publishClockFormat()

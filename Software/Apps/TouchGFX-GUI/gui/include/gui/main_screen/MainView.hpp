@@ -33,6 +33,9 @@ public:
     /** @brief The day's step count, preserved if needed. */
     void setSteps(uint32_t steps);
 
+    /** @brief Update the battery indicator level (0..100%) and visibility. */
+    void setBattery(uint8_t level, bool enabled);
+
     /** @brief Update the battery indicator level (0..100%). */
     void setBatteryLevel(uint8_t level);
 
@@ -88,6 +91,7 @@ private:
     touchgfx::Box       mBatteryNub;
     touchgfx::Box       mBatterySegments[4];
     uint8_t             mBatteryLevel { 100 };
+    bool                mBatteryEnabled { true };
 };
 
 #endif // MAINVIEW_HPP

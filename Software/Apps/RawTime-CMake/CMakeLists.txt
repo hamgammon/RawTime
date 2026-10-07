@@ -37,14 +37,13 @@ set(BUILD_VERSION "1.0.0")
 una_app_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Build service
-# The clockface keeps no state and writes no files, so the only optional group
-# of UNA_SDK_SOURCES_SERVICE it takes is the sensor layer, which is where the
-# day's step count comes from.
 set(SERVICE_SOURCES
     ${LIBS_SOURCES}
     ${UNA_SDK_SOURCES_COMMON}
     ${UNA_SDK_SOURCES_APPSYSTEM}
     ${UNA_SDK_SOURCES_SENSOR}
+    ${UNA_SDK_SOURCES_JSON}
+    ${UNA_SDK_SOURCES_APPCONFIG}
 )
 set(SERVICE_INCLUDE_DIRS
     ${LIBS_INCLUDE_DIRS}

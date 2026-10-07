@@ -81,7 +81,7 @@ void MainView::setupScreen()
     mStyle = presenter->clockStyle();
     layoutDate();
     setTime(presenter->currentTime());
-    setBatteryLevel(presenter->batteryLevel());
+    setBattery(presenter->batteryLevel(), presenter->isBatteryEnabled());
 }
 
 void MainView::tearDownScreen()
@@ -231,7 +231,25 @@ void MainView::setSteps(uint32_t /*steps*/)
 
 void MainView::setBatteryLevel(uint8_t level)
 {
-    mBatteryLevel = level;
+    setBattery(level, mBatteryEnabled);
+}
+
+void MainView::setBattery(uint8_t level, bool enabled)
+{
+    mBatteryLevel   = level;
+    mBatteryEnabled = enabled;
+
+    if (!mBatteryEnabled) {
+        if (mBatteryContainer.isVisible()) {
+            mBatteryContainer.setVisible(false);
+            mBatteryContainer.invalidate();
+        }
+        return;
+    }
+
+    if (!mBatteryContainer.isVisible()) {
+        mBatteryContainer.setVisible(true);
+    }
 
     // Segment thresholds matching UNA convention:
     //  0 %       0 segments

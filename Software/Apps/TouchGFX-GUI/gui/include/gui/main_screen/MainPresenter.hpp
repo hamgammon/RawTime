@@ -33,11 +33,14 @@ public:
 
     uint8_t batteryLevel() const { return model->batteryLevel(); }
 
+    bool isBatteryEnabled() const { return model->isBatteryEnabled(); }
+
     ClockStyle clockStyle() const { return model->clockStyle(); }
 
     // ModelListener
     virtual void onTime(const WallTime &time) override;
     virtual void onSteps(uint32_t steps) override;
+    virtual void onBattery(uint8_t level, bool enabled) override;
     virtual void onBatteryLevel(uint8_t level) override;
     virtual void onClockStyle(const ClockStyle &style) override;
 

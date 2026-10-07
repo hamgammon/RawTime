@@ -61,20 +61,24 @@ struct Time : public SDK::MessageBase {
 };
 
 /**
- * @brief The charge level the service last read from the sensor layer.
+ * @brief The charge level the service last read from the sensor layer, and
+ *        whether the gauge is enabled on the watch face.
  */
 struct Battery : public SDK::MessageBase {
     uint8_t level;      ///< 0..100 %
+    bool    enabled;    ///< Whether the battery gauge is enabled on the watch face
 
     Battery()
         : SDK::MessageBase(BATTERY)
         , level(0)
+        , enabled(true)
     {}
 
-    explicit Battery(uint8_t level)
+    explicit Battery(uint8_t level, bool enabled = true)
         : Battery()
     {
-        this->level = level;
+        this->level   = level;
+        this->enabled = enabled;
     }
 };
 
