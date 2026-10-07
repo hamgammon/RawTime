@@ -33,7 +33,7 @@ endif()
 project(${APP_NAME})
 
 # Set up version
-set(BUILD_VERSION "1.0.0")
+set(BUILD_VERSION "1.1.0")
 una_app_setup_version(BUILD_VERSION ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Build service
