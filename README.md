@@ -98,7 +98,7 @@ cmake --build build
 
 The compiled package will be generated at:
 ```text
-build/RawTime_1.1.0.uapp
+build/RawTime_1.2.0.uapp
 ```
 
 ## License
