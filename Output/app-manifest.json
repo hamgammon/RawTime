@@ -19,6 +19,13 @@
       "label": "Show battery",
       "description": "Show the battery indicator on the watch face.",
       "default": true
+    },
+    {
+      "id": "showSeconds",
+      "type": "bool",
+      "label": "Show seconds",
+      "description": "Show seconds on the watch face using a smaller clock font.",
+      "default": false
     }
   ],
   "supportsLaps": false,

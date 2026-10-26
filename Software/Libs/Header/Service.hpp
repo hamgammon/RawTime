@@ -96,7 +96,8 @@ private:
 
     uint8_t  mHour;                 ///< Last reading sent to the GUI, compared
     uint8_t  mMinute;               ///< in full, because a clock can be set to
-    uint8_t  mMday;                 ///< the same time on a different day
+    uint8_t  mSecond;               ///< the same time on a different day
+    uint8_t  mMday;
     uint8_t  mWday;
     uint8_t  mMon;
     bool     mTimeSent;             ///< A time has reached the GUI
@@ -104,6 +105,8 @@ private:
     std::unique_ptr<SDK::AppConfig> mConfig;
     bool     mShowBattery;          ///< Battery indicator enabled in config
     bool     mSentShowBattery;      ///< Last battery enabled state sent to GUI
+    bool     mShowSeconds;          ///< Seconds display enabled in config
+    bool     mSentShowSeconds;      ///< Last seconds enabled state sent to GUI
     uint8_t  mBatteryLevel;         ///< Latest battery level (0..100)
     uint8_t  mSentBatteryLevel;     ///< Last battery level sent to GUI
     bool     mBatterySent;          ///< Battery level has reached the GUI

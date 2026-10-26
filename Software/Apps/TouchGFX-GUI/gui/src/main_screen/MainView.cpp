@@ -1,7 +1,13 @@
 #include <gui/main_screen/MainView.hpp>
 #include <gui/common/RawTimeLabels.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
+#include <texts/TypedTextDatabase.hpp>
+#include <fonts/GeneratedFont.hpp>
 #include <touchgfx/Color.hpp>
 #include <cstdio>
+
+extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_76_2bpp();
+extern touchgfx::GeneratedFont& getFont_Poppins_SemiBold_48_2bpp();
 
 /// The face is square and the clock group is centred on it.
 static const int16_t kFaceWidth = 240;
@@ -16,8 +22,8 @@ static const char* const kMonthNames[12] = {
 };
 
 MainView::MainView()
-    : mShown{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }  // nothing on screen yet, so the first reading draws
-    , mStyle{ false, false }
+    : mShown{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }  // nothing on screen yet, so the first reading draws
+    , mStyle{ false, false, false }
 {
 
 }
@@ -48,6 +54,28 @@ void MainView::setupScreen()
     colonText.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     minuteText.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
     meridiemText.setColor(touchgfx::Color::getColorFromRGB(180, 180, 180));
+
+    // Construct seconds colon and digits widgets (for optional HH:MM:SS mode)
+    if (mColon2Text.getParent() == nullptr) {
+        mColon2Text.setPosition(0, kClockSecondsY, 12, kClockSecondsHeight);
+        mColon2Text.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+        mColon2Text.setLinespacing(0);
+        mColon2Text.setTypedText(touchgfx::TypedText(T_TEXT_CONSOLE_COLON));
+        mColon2Text.setVisible(false);
+        add(mColon2Text);
+    }
+
+    if (mSecondText.getParent() == nullptr) {
+        mSecondText.setPosition(0, kClockSecondsY, 64, kClockSecondsHeight);
+        mSecondText.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+        mSecondText.setLinespacing(0);
+        Unicode::snprintf(mSecondTextBuffer, SECONDTEXT_SIZE, "%s",
+                          touchgfx::TypedText(T_WC_CONSOLE_MINUTE).getText());
+        mSecondText.setWildcard(mSecondTextBuffer);
+        mSecondText.setTypedText(touchgfx::TypedText(T_TMP_CONSOLE_CLOCK));
+        mSecondText.setVisible(false);
+        add(mSecondText);
+    }
 
     // Construct battery indicator widget at bottom centre (x = 99, y = 206, w = 42, h = 16)
     if (mBatteryContainer.getParent() == nullptr) {
@@ -99,10 +127,35 @@ void MainView::place(touchgfx::TextArea &area, int16_t x, int16_t y,
 
 void MainView::layoutClock()
 {
+    hourText.invalidate();
+    colonText.invalidate();
+    minuteText.invalidate();
+    mColon2Text.invalidate();
+    mSecondText.invalidate();
+    meridiemText.invalidate();
+
+    // Font index 1 is used by T_TMP_CONSOLE_CLOCK and T_TEXT_CONSOLE_COLON.
+    // Switch to 48pt when showing seconds so HH:MM:SS fits on one line, or 76pt for HH:MM.
+    TypedTextDatabase::setFont(1, mStyle.showSeconds
+        ? &(getFont_Poppins_SemiBold_48_2bpp())
+        : &(getFont_Poppins_SemiBold_76_2bpp()));
+
+    const int16_t clockY      = mStyle.showSeconds ? kClockSecondsY : kClockY;
+    const int16_t clockHeight = mStyle.showSeconds ? kClockSecondsHeight : kClockHeight;
+
     const int16_t hourWidth   = static_cast<int16_t>(hourText.getTextWidth());
     const int16_t minuteWidth = static_cast<int16_t>(minuteText.getTextWidth());
     const int16_t colonWidth  = static_cast<int16_t>(colonText.getTextWidth());
-    const int16_t digitsTotal = static_cast<int16_t>(hourWidth + colonWidth + minuteWidth);
+
+    int16_t colon2Width = 0;
+    int16_t secondWidth = 0;
+    if (mStyle.showSeconds) {
+        colon2Width = static_cast<int16_t>(mColon2Text.getTextWidth());
+        secondWidth = static_cast<int16_t>(mSecondText.getTextWidth());
+    }
+
+    const int16_t digitsTotal = static_cast<int16_t>(
+        hourWidth + colonWidth + minuteWidth + colon2Width + secondWidth);
 
     int16_t total = digitsTotal;
     bool inlineMeridiem = false;
@@ -116,24 +169,45 @@ void MainView::layoutClock()
 
     int16_t x = static_cast<int16_t>((kFaceWidth - total) / 2);
 
-    place(hourText, x, kClockY, hourWidth, kClockHeight);
+    place(hourText, x, clockY, hourWidth, clockHeight);
     x = static_cast<int16_t>(x + hourWidth);
 
-    place(colonText, x, kClockY, colonWidth, kClockHeight);
+    place(colonText, x, clockY, colonWidth, clockHeight);
     x = static_cast<int16_t>(x + colonWidth);
 
-    place(minuteText, x, kClockY, minuteWidth, kClockHeight);
-    x = static_cast<int16_t>(x + minuteWidth + kMeridiemGap);
+    place(minuteText, x, clockY, minuteWidth, clockHeight);
+    x = static_cast<int16_t>(x + minuteWidth);
+
+    if (mStyle.showSeconds) {
+        place(mColon2Text, x, clockY, colon2Width, clockHeight);
+        x = static_cast<int16_t>(x + colon2Width);
+
+        place(mSecondText, x, clockY, secondWidth, clockHeight);
+        x = static_cast<int16_t>(x + secondWidth);
+
+        mColon2Text.setVisible(true);
+        mColon2Text.invalidate();
+        mSecondText.setVisible(true);
+        mSecondText.invalidate();
+    } else {
+        mColon2Text.setVisible(false);
+        mColon2Text.invalidate();
+        mSecondText.setVisible(false);
+        mSecondText.invalidate();
+    }
+
+    x = static_cast<int16_t>(x + kMeridiemGap);
 
     if (mStyle.is12h) {
-        int16_t mWidth = static_cast<int16_t>(meridiemText.getTextWidth());
+        const int16_t mWidth = static_cast<int16_t>(meridiemText.getTextWidth());
+        const int16_t meridiemDrop = mStyle.showSeconds ? kMeridiemSecondsDrop : kMeridiemDrop;
         if (inlineMeridiem) {
-            place(meridiemText, x, static_cast<int16_t>(kClockY + kMeridiemDrop),
+            place(meridiemText, x, static_cast<int16_t>(clockY + meridiemDrop),
                   mWidth, kMeridiemHeight);
         } else {
-            // Tucked neatly above the top-right of the minute digits
+            // Tucked neatly above the top-right of the rightmost digits
             place(meridiemText, static_cast<int16_t>(kFaceWidth - mWidth - 10),
-                  static_cast<int16_t>(kClockY - kMeridiemHeight + 4),
+                  static_cast<int16_t>(clockY - kMeridiemHeight + 4),
                   mWidth, kMeridiemHeight);
         }
         meridiemText.setVisible(true);
@@ -169,6 +243,11 @@ void MainView::updateClockText()
 
     Unicode::snprintf(minuteTextBuffer, MINUTETEXT_SIZE, "%02u",
                       static_cast<unsigned>(mShown.minute));
+
+    if (mStyle.showSeconds) {
+        Unicode::snprintf(mSecondTextBuffer, SECONDTEXT_SIZE, "%02u",
+                          static_cast<unsigned>(mShown.second));
+    }
 }
 
 void MainView::updateDateText()
@@ -204,7 +283,21 @@ void MainView::setTime(const WallTime &time)
         return;
     }
 
+    const bool minuteAndDateSame =
+        (time.hour == mShown.hour) && (time.minute == mShown.minute) &&
+        (time.mday == mShown.mday) && (time.wday == mShown.wday) &&
+        (time.mon == mShown.mon);
+
     mShown = time;
+
+    if (minuteAndDateSame) {
+        if (mStyle.showSeconds && mSecondText.isVisible()) {
+            Unicode::snprintf(mSecondTextBuffer, SECONDTEXT_SIZE, "%02u",
+                              static_cast<unsigned>(mShown.second));
+            mSecondText.invalidate();
+        }
+        return;
+    }
 
     updateClockText();
     layoutClock();

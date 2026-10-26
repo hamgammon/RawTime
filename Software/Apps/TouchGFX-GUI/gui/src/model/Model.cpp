@@ -41,6 +41,7 @@ WallTime Model::now() const
 
     return { static_cast<uint8_t>(local.tm_hour),
              static_cast<uint8_t>(local.tm_min),
+             static_cast<uint8_t>(local.tm_sec),
              static_cast<uint8_t>(local.tm_mday),
              static_cast<uint8_t>(local.tm_wday),
              static_cast<uint8_t>(local.tm_mon) };
@@ -131,7 +132,7 @@ bool Model::customMessageHandler(SDK::MessageBase *message)
     switch (message->getType()) {
         case CustomMessage::TIME: {
             auto *msg = static_cast<CustomMessage::Time*>(message);
-            adopt(WallTime{ msg->hour, msg->minute, msg->mday, msg->wday, msg->mon });
+            adopt(WallTime{ msg->hour, msg->minute, msg->second, msg->mday, msg->wday, msg->mon });
         } break;
 
         case CustomMessage::BATTERY: {
@@ -158,7 +159,7 @@ bool Model::customMessageHandler(SDK::MessageBase *message)
 
         case CustomMessage::CLOCK_FORMAT: {
             auto *msg = static_cast<CustomMessage::ClockFormat*>(message);
-            const ClockStyle style { msg->is12h, msg->monthFirst };
+            const ClockStyle style { msg->is12h, msg->monthFirst, msg->showSeconds };
             if (!(mStyle == style)) {
                 mStyle = style;
                 if (modelListener) {

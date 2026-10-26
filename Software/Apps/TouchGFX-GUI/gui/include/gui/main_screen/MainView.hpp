@@ -69,8 +69,13 @@ private:
     static const int16_t kClockY = 56;
     static const int16_t kClockHeight = 80;
 
+    /// Vertical placement when seconds are shown (48pt font).
+    static const int16_t kClockSecondsY = 74;
+    static const int16_t kClockSecondsHeight = 52;
+
     /// The meridiem sits on the clock's baseline.
     static const int16_t kMeridiemDrop = 42;
+    static const int16_t kMeridiemSecondsDrop = 32;
     static const int16_t kMeridiemHeight = 20;
     static const int16_t kMeridiemGap = 6;
 
@@ -83,6 +88,12 @@ private:
 
     static const uint16_t DATE_BUFFER_SIZE = 32;
     touchgfx::Unicode::UnicodeChar mDateBuffer[DATE_BUFFER_SIZE];
+
+    // Optional seconds widgets (for HH:MM:SS mode)
+    touchgfx::TextArea                mColon2Text;
+    touchgfx::TextAreaWithOneWildcard mSecondText;
+    static const uint16_t             SECONDTEXT_SIZE = 3;
+    touchgfx::Unicode::UnicodeChar    mSecondTextBuffer[SECONDTEXT_SIZE];
 
     // Battery indicator at bottom centre
     touchgfx::Container mBatteryContainer;

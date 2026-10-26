@@ -22,6 +22,7 @@ struct WallTime
 {
     uint8_t hour;       ///< 0..23
     uint8_t minute;     ///< 0..59
+    uint8_t second;     ///< 0..59
     uint8_t mday;       ///< Day of month, 1..31
     uint8_t wday;       ///< Day of week, 0 = Sunday, as std::tm::tm_wday
     uint8_t mon;        ///< Month, 0 = January, as std::tm::tm_mon
@@ -29,7 +30,8 @@ struct WallTime
     bool operator==(const WallTime &o) const
     {
         return (hour == o.hour) && (minute == o.minute) &&
-               (mday == o.mday) && (wday == o.wday) && (mon == o.mon);
+               (second == o.second) && (mday == o.mday) &&
+               (wday == o.wday) && (mon == o.mon);
     }
 };
 
@@ -37,17 +39,19 @@ class FrontendApplication;
 /**
  * @brief How the watch is set to write the time and the date.
  *
- * Settings rather than readings, and the only two the face cannot work out for
- * itself. They are kept together because they arrive from the same read.
+ * Settings rather than readings, and the ones the face cannot work out for
+ * itself. They are kept together because they arrive from the service.
  */
 struct ClockStyle
 {
     bool is12h;       ///< 12-hour clock with a meridiem, rather than 24-hour
     bool monthFirst;  ///< Month above the day of the month, rather than below
+    bool showSeconds; ///< Show seconds on the same line using a smaller font
 
     bool operator==(const ClockStyle &o) const
     {
-        return (is12h == o.is12h) && (monthFirst == o.monthFirst);
+        return (is12h == o.is12h) && (monthFirst == o.monthFirst) &&
+               (showSeconds == o.showSeconds);
     }
 };
 

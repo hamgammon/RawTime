@@ -15,6 +15,7 @@ using SDK::AppConfig;
 // validate_app_config.py --check <app-manifest.json> --check-bounds <this file>.
 const AppConfig::Field kFields[] = {
     AppConfig::boolField("showBattery", true),
+    AppConfig::boolField("showSeconds", false),
 };
 
 const size_t kFieldCount = sizeof(kFields) / sizeof(kFields[0]);

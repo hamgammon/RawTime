@@ -33,14 +33,15 @@ flowchart TD
 ## Features
 
 - **Large Bold Digital Clock**: Giant, high-contrast time readout rendered in **76pt Poppins SemiBold** (`Poppins_SemiBold_76_2bpp`) spanning 220px horizontally for maximum legibility on the 240px screen with comfortable 10px margins. Supports 24-hour and 12-hour formats.
+  - **Configurable Seconds (`showSeconds`)**: Optional seconds readout on the same line (`HH:MM:SS`), automatically switching the time digits to **48pt Poppins SemiBold** (`Poppins_SemiBold_48_2bpp`, 216px total width) so hours, minutes, and seconds fit cleanly across the display.
 - **Single-Line Date**: Compact, clean date display underneath the clock in 16pt font (`Fri 02 Oct`), showing the 3-letter weekday, 2-digit day of the month, and 3-letter month name.
 - **Battery Indicator**: Bottom-center vector battery gauge with 4 charge segments:
   - `75% - 100%`: 4 active segments
   - `50% - 74%`: 3 active segments
   - `25% - 49%`: 2 active segments
   - `1% - 24%`: 1 active segment
-  - **Configurable**: Can be disabled/hidden from the watch face via companion app configuration (`showBattery`).
-- **Power Efficient**: Adheres strictly to the UNA Watch power guidelines ("Do not subscribe to what you do not draw") — subscribes to `BATTERY_LEVEL` sensor events only when the battery gauge is enabled, and drops the sensor subscription entirely when disabled.
+  - **Configurable (`showBattery`)**: Can be disabled/hidden from the watch face via companion app configuration (`showBattery`).
+- **Power Efficient**: Adheres strictly to the UNA Watch power guidelines ("Do not subscribe to what you do not draw") — subscribes to `BATTERY_LEVEL` sensor events only when the battery gauge is enabled, and wakes the service once per minute when seconds are disabled (or once per second with partial dirty-rect redraw of only the seconds digits when enabled).
 
 ## Architecture
 

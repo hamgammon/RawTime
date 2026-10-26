@@ -28,14 +28,15 @@ constexpr SDK::MessageType::Type CLOCK_FORMAT = 0x00000005;
 constexpr SDK::MessageType::Type REFRESH      = 0x00000010;
 
 /**
- * @brief The local time, to the minute, and the date that goes with it.
+ * @brief The local time, and the date that goes with it.
  *
- * The face draws nothing finer than a minute, so nothing finer is carried.
- * Sent when the minute turns.
+ * Sent once per minute when seconds are disabled, or once per second when
+ * showSeconds is enabled in configuration.
  */
 struct Time : public SDK::MessageBase {
     uint8_t hour;       ///< 0..23, always; the GUI is what folds it to 12
     uint8_t minute;     ///< 0..59
+    uint8_t second;     ///< 0..59 (0 when showSeconds is disabled)
     uint8_t mday;       ///< Day of month, 1..31
     uint8_t wday;       ///< Day of week, 0 = Sunday, as std::tm::tm_wday
     uint8_t mon;        ///< Month, 0 = January, as std::tm::tm_mon
@@ -44,16 +45,18 @@ struct Time : public SDK::MessageBase {
         : SDK::MessageBase(TIME)
         , hour(0)
         , minute(0)
+        , second(0)
         , mday(0)
         , wday(0)
         , mon(0)
     {}
 
-    Time(uint8_t hour, uint8_t minute, uint8_t mday, uint8_t wday, uint8_t mon)
+    Time(uint8_t hour, uint8_t minute, uint8_t second, uint8_t mday, uint8_t wday, uint8_t mon)
         : Time()
     {
         this->hour   = hour;
         this->minute = minute;
+        this->second = second;
         this->mday   = mday;
         this->wday   = wday;
         this->mon    = mon;
@@ -120,18 +123,21 @@ struct Steps : public SDK::MessageBase {
 struct ClockFormat : public SDK::MessageBase {
     bool is12h;
     bool monthFirst;
+    bool showSeconds;
 
     ClockFormat()
         : SDK::MessageBase(CLOCK_FORMAT)
         , is12h(false)
         , monthFirst(false)
+        , showSeconds(false)
     {}
 
-    ClockFormat(bool is12h, bool monthFirst)
+    ClockFormat(bool is12h, bool monthFirst, bool showSeconds = false)
         : ClockFormat()
     {
-        this->is12h      = is12h;
-        this->monthFirst = monthFirst;
+        this->is12h       = is12h;
+        this->monthFirst  = monthFirst;
+        this->showSeconds = showSeconds;
     }
 };
 

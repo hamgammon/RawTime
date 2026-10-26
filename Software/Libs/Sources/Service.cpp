@@ -66,12 +66,15 @@ Service::Service(SDK::Kernel &kernel)
     , mBatterySensor(SDK::Sensor::Type::BATTERY_LEVEL)
     , mHour(0)
     , mMinute(0)
+    , mSecond(0)
     , mMday(0)
     , mWday(0)
     , mMon(0)
     , mTimeSent(false)
     , mShowBattery(true)
     , mSentShowBattery(true)
+    , mShowSeconds(false)
+    , mSentShowSeconds(false)
     , mBatteryLevel(100)
     , mSentBatteryLevel(0)
     , mBatterySent(false)
@@ -97,8 +100,11 @@ void Service::run()
                                      RawTimeConfig::kFields,
                                      RawTimeConfig::kFieldCount));
     mShowBattery = mConfig->getBool("showBattery");
+    mShowSeconds = mConfig->getBool("showSeconds");
 
-    LOG_INFO("Started (showBattery: %s)\n", mShowBattery ? "yes" : "no");
+    LOG_INFO("Started (showBattery: %s, showSeconds: %s)\n",
+             mShowBattery ? "yes" : "no",
+             mShowSeconds ? "yes" : "no");
 
     // Do not subscribe to what you do not draw: only connect if enabled
     if (mShowBattery) {
@@ -125,7 +131,7 @@ void Service::run()
             refreshSystemSettings();
         }
 
-        uint32_t wait = msToNextMinute(local);
+        uint32_t wait = mShowSeconds ? kMsPerSecond : msToNextMinute(local);
 
         // No GUI yet. One that has not come up by the end of the grace never
         // will, and neither will the COMMAND_APP_NOTIF_GUI_STOP that normally
@@ -162,6 +168,7 @@ void Service::run()
             case SDK::MessageType::COMMAND_APP_NOTIF_GUI_RUN:
                 LOG_INFO("GUI is now running\n");
                 guiStarted = true;
+                mTimeSent = false;
                 publishBattery();
                 refreshSystemSettings();
                 break;
@@ -240,6 +247,7 @@ void Service::republishAll()
                                          RawTimeConfig::kFieldCount));
         const bool prevShowBattery = mShowBattery;
         mShowBattery = mConfig->getBool("showBattery");
+        mShowSeconds = mConfig->getBool("showSeconds");
         if (mShowBattery != prevShowBattery) {
             if (mShowBattery) {
                 connect();
@@ -278,23 +286,27 @@ void Service::publishTime(const std::tm &local)
 {
     const uint8_t hour   = static_cast<uint8_t>(local.tm_hour);
     const uint8_t minute = static_cast<uint8_t>(local.tm_min);
+    const uint8_t second = mShowSeconds ? static_cast<uint8_t>(local.tm_sec) : 0u;
     const uint8_t mday   = static_cast<uint8_t>(local.tm_mday);
     const uint8_t wday   = static_cast<uint8_t>(local.tm_wday);
     const uint8_t mon    = static_cast<uint8_t>(local.tm_mon);
 
     if (mTimeSent && (hour == mHour) && (minute == mMinute) &&
-        (mday == mMday) && (wday == mWday) && (mon == mMon)) {
+        (second == mSecond) && (mday == mMday) && (wday == mWday) &&
+        (mon == mMon)) {
         return;
     }
 
     mHour     = hour;
     mMinute   = minute;
+    mSecond   = second;
     mMday     = mday;
     mWday     = wday;
     mMon      = mon;
     // Set from the result, not before it: send_msg fails when the GUI's
     // queue is full, and a value recorded as sent is never offered again.
-    mTimeSent = SDK::send_msg<CustomMessage::Time>(mKernel, hour, minute, mday, wday, mon);
+    mTimeSent = SDK::send_msg<CustomMessage::Time>(
+        mKernel, hour, minute, second, mday, wday, mon);
 }
 
 void Service::publishBattery()
@@ -313,12 +325,14 @@ void Service::publishBattery()
 void Service::publishClockFormat()
 {
     if (mFormatSent && (mIs12h == mSentIs12h) &&
-            (mMonthFirst == mSentMonthFirst)) {
+            (mMonthFirst == mSentMonthFirst) &&
+            (mShowSeconds == mSentShowSeconds)) {
         return;
     }
 
-    mSentIs12h      = mIs12h;
-    mSentMonthFirst = mMonthFirst;
-    mFormatSent     = SDK::send_msg<CustomMessage::ClockFormat>(
-        mKernel, mSentIs12h, mSentMonthFirst);
+    mSentIs12h       = mIs12h;
+    mSentMonthFirst  = mMonthFirst;
+    mSentShowSeconds = mShowSeconds;
+    mFormatSent      = SDK::send_msg<CustomMessage::ClockFormat>(
+        mKernel, mSentIs12h, mSentMonthFirst, mSentShowSeconds);
 }
